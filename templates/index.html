@@ -1,0 +1,939 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataTrust | Professional Data Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f4f9;color:#172033}
+header{background:linear-gradient(120deg,#101c35,#263f70);color:white;padding:27px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+header h1{margin:0;font-size:30px;letter-spacing:1px}
+header p{margin:7px 0 0;color:#cbd5e1}
+.header-tag{border:1px solid #ffffff55;padding:9px 15px;border-radius:20px;font-size:12px}
+main{max-width:1300px;margin:28px auto;padding:0 20px}
+.panel{background:white;border-radius:13px;padding:23px;margin-bottom:22px;box-shadow:0 4px 18px #1720330c;border:1px solid #e8edf5}
+h2{font-size:20px;margin:0 0 18px}
+h3{font-size:16px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.upload{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+input[type=file],select{padding:12px;border:1px solid #ccd5e2;border-radius:7px;background:white}
+button{border:0;padding:10px 15px;border-radius:7px;background:#2459d3;color:white;font-weight:bold;cursor:pointer}
+button:hover{background:#1745ac}
+button:disabled{opacity:.5;cursor:not-allowed}
+.pdf-btn{background:#137b63}
+.pdf-btn:hover{background:#0c604d}
+.delete-btn{background:#c53030}
+.delete-btn:hover{background:#9b2020}
+.secondary-btn{background:#52647e}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.stat{background:#f6f8fd;padding:19px;border-radius:10px;border:1px solid #e4eaf5}
+.stat span{font-size:13px;color:#64748b}
+.stat strong{display:block;font-size:27px;margin-top:9px;color:#172d53;overflow-wrap:anywhere}
+.stat small{color:#64748b}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.chart-card{border:1px solid #e6ebf3;border-radius:10px;padding:16px;min-width:0;background:#fff}
+.chart-card canvas{max-height:280px}
+.issue{padding:14px;border:1px solid #e5eaf2;border-left:4px solid #d99a27;border-radius:8px;margin:10px 0}
+.issue.High{border-left-color:#dc4242}
+.issue.Low{border-left-color:#249b73}
+.muted{color:#64748b;font-size:13px}
+.success{color:#14835d}
+.error{color:#c53030}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #e8edf4}
+th{background:#f5f7fb;color:#344563}
+.table-wrap{overflow-x:auto}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}
+.hidden{display:none}
+.badge{background:#eaf1ff;color:#2459d3;padding:6px 10px;border-radius:15px;font-size:12px}
+footer{text-align:center;padding:25px;color:#64748b}
+.history-actions{display:flex;gap:7px;flex-wrap:wrap}
+.history-actions button{font-size:12px;padding:8px 11px}
+.details-box{background:#f6f8fd;border:1px solid #e4eaf5;padding:18px;border-radius:9px;margin-top:18px}
+.details-box h3{margin-top:20px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f8fd;padding:14px;border-radius:8px;font-size:12px;max-height:400px;overflow:auto}
+
+/* ANOMALY DETECTION DESIGN */
+
+.anomaly-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:18px 0}
+.anomaly-card{background:#f6f8fd;border:1px solid #e4eaf5;padding:19px;border-radius:10px}
+.anomaly-card span{font-size:13px;color:#64748b}
+.anomaly-card strong{display:block;font-size:27px;color:#172d53;margin-top:9px}
+.anomaly-sheet{border:1px solid #e5eaf2;border-radius:11px;padding:18px;margin:18px 0;background:#fff}
+.anomaly-sheet-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.anomaly-status{font-size:12px;padding:6px 11px;border-radius:20px;background:#e7f7ef;color:#137b55}
+.anomaly-status.warning{background:#fff4df;color:#98620b}
+.anomaly-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
+.anomaly-search{flex:1;min-width:180px;padding:11px;border:1px solid #ccd5e2;border-radius:7px}
+.anomaly-table th{white-space:nowrap}
+.score-value{font-weight:bold;color:#b45309}
+.anomaly-pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+.anomaly-pagination button{padding:8px 13px}
+.anomaly-empty{padding:18px;background:#f6f8fd;border-radius:8px;color:#64748b}
+.anomaly-note{background:#f6f8fd;border:1px solid #e4eaf5;padding:14px;border-radius:8px;margin-top:15px;font-size:13px;color:#52647e}
+.anomaly-sheet select{padding:9px}
+
+@media(max-width:600px){
+ main{padding:0 12px}
+ .panel{padding:16px}
+ .chart-grid{grid-template-columns:1fr}
+ .anomaly-pagination{align-items:flex-start}
+}
+@media print{
+ @page{size:A4;margin:12mm}
+ body{background:white!important;color:#172033}
+ header{background:#101c35!important;color:white!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ main{max-width:100%;margin:10px auto;padding:0}
+ .panel{box-shadow:none;border:1px solid #ddd;break-inside:auto}
+ .chart-card,.stat,.issue,.anomaly-sheet{break-inside:avoid}
+ .chart-grid{grid-template-columns:1fr 1fr}
+ .upload-panel,.cleaning-panel,.no-print,footer{display:none!important}
+ #dashboard{display:block!important}
+ #dashboard .panel{display:block!important}
+ .chart-card canvas{max-height:220px}
+ button,input,select{display:none!important}
+ .anomaly-pagination{display:none!important}
+}
+</style>
+</head>
+
+<body>
+<header>
+ <div>
+  <h1>DataTrust</h1>
+  <p>Intelligent Data Quality & Visual Analytics Platform</p>
+ </div>
+ <div class="header-tag">PROFESSIONAL DATA INTELLIGENCE</div>
+</header>
+
+<main>
+
+<section class="panel upload-panel">
+ <h2>Upload Your Dataset</h2>
+ <div class="upload">
+  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+  <button id="uploadBtn" onclick="uploadDataset()">Upload & Analyze</button>
+ </div>
+ <p class="muted">Supported formats: CSV, XLSX and XLS. Maximum size: 50 MB.</p>
+ <p id="status"></p>
+</section>
+
+<section class="panel no-print">
+ <div class="section-title">
+  <h2>Analysis History</h2>
+  <button class="secondary-btn" onclick="loadHistory()">Refresh History</button>
+ </div>
+ <p class="muted">View and manage previously analyzed datasets.</p>
+ <p id="historyStatus" class="muted">Loading analysis history...</p>
+ <div class="table-wrap">
+  <table>
+   <thead>
+    <tr>
+     <th>Dataset</th><th>Analysis Date</th><th>Records</th><th>Issues</th><th>Actions</th>
+    </tr>
+   </thead>
+   <tbody id="historyTable"></tbody>
+  </table>
+ </div>
+ <div id="historyDetails"></div>
+</section>
+
+<div id="dashboard" class="hidden">
+
+ <section class="panel">
+  <div class="section-title">
+   <h2>Data Overview</h2>
+   <button class="pdf-btn no-print" onclick="exportPDF()">Download PDF Report</button>
+  </div>
+  <p class="muted" id="reportFilename"></p>
+  <div class="grid" id="overview"></div>
+ </section>
+
+ <section class="panel">
+  <div class="section-title">
+   <h2>Visual Analytics Dashboard</h2>
+   <span class="badge">LIVE ANALYSIS</span>
+  </div>
+  <p class="muted">Charts are calculated using the uploaded dataset.</p>
+  <label for="sheetSelect">Select worksheet: </label>
+  <select id="sheetSelect" onchange="renderSheetAnalytics()"></select>
+  <div class="grid" id="numericStats" style="margin-top:18px"></div>
+  <div class="chart-grid" id="charts" style="margin-top:20px"></div>
+ </section>
+
+ <section class="panel">
+  <h2>Data Quality Overview</h2>
+  <div class="grid" id="quality"></div>
+  <div class="chart-grid" style="margin-top:20px">
+   <div class="chart-card">
+    <h3>Issue Severity Distribution</h3>
+    <canvas id="severityChart"></canvas>
+   </div>
+  </div>
+ </section>
+
+ <section class="panel">
+  <h2>Anomaly Detection</h2>
+  <p class="muted">Review unusual records identified by the anomaly detection model.</p>
+  <div id="anomalies"></div>
+ </section>
+
+ <section class="panel">
+  <h2>Smart Recommendations</h2>
+  <p class="muted">Recommended actions based on the issues found in your dataset.</p>
+  <div id="recommendations"></div>
+ </section>
+
+ <section class="panel">
+  <h2>Validation Checks</h2>
+  <div class="table-wrap">
+   <table>
+    <thead>
+     <tr><th>Sheet</th><th>Rows</th><th>Columns</th><th>Missing</th><th>Duplicates</th><th>Issues</th></tr>
+    </thead>
+    <tbody id="validationTable"></tbody>
+   </table>
+  </div>
+ </section>
+
+ <section class="panel cleaning-panel">
+  <h2>Automatic Data Cleaning</h2>
+  <p class="muted">Choose the cleaning operations you want to preview.</p>
+  <label><input type="checkbox" id="trimSpaces" checked> Trim extra spaces</label><br><br>
+  <label><input type="checkbox" id="fillMissing" checked> Fill missing values</label><br><br>
+  <label><input type="checkbox" id="removeDuplicates" checked> Remove duplicate rows</label><br>
+  <div class="actions">
+   <button onclick="previewCleaning()">Generate Cleaning Preview</button>
+   <button id="downloadBtn" onclick="downloadCleaned()" disabled>Download Cleaned Dataset</button>
+  </div>
+  <p id="cleanStatus"></p>
+  <div id="cleanResults"></div>
+ </section>
+
+</div>
+</main>
+
+<footer>DataTrust — Making Data More Reliable, Understandable and Useful</footer>
+
+<script>
+let currentFile=null;
+let currentData=null;
+let cleanToken=null;
+let chartInstances=[];
+let severityChartInstance=null;
+
+const anomalyPageSize=10;
+let anomalySheets=[];
+
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,char=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[char]));
+}
+
+function showStatus(message,type=""){
+ const el=document.getElementById("status");
+ el.textContent=message;
+ el.className=type;
+}
+
+/* ANALYSIS HISTORY */
+
+async function loadHistory(){
+ const status=document.getElementById("historyStatus");
+ const table=document.getElementById("historyTable");
+ status.textContent="Loading history...";
+ status.className="muted";
+
+ try{
+  const response=await fetch("/history");
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.message||"Unable to load history.");
+
+  const records=Array.isArray(data)?data:(data.history||data.records||[]);
+
+  if(!records.length){
+   table.innerHTML='<tr><td colspan="5">No previous analyses found.</td></tr>';
+   status.textContent="No analysis history available yet.";
+   return;
+  }
+
+  table.innerHTML=records.map(item=>{
+   const id=Number(item.id);
+   if(!Number.isInteger(id)||id<=0)return "";
+   return `
+    <tr>
+     <td>${escapeHTML(item.filename)}</td>
+     <td>${escapeHTML(item.analyzed_at)}</td>
+     <td>${Number(item.total_rows||0).toLocaleString()}</td>
+     <td>${Number(item.total_issues||0).toLocaleString()}</td>
+     <td>
+      <div class="history-actions">
+       <button onclick="viewHistory(${id})">View Details</button>
+       <button class="delete-btn" onclick="deleteHistory(${id})">Delete</button>
+      </div>
+     </td>
+    </tr>`;
+  }).join("");
+
+  status.textContent=records.length+" previous analysis record(s) found.";
+
+ }catch(error){
+  table.innerHTML='<tr><td colspan="5">History could not be loaded.</td></tr>';
+  status.textContent="History error: "+error.message;
+  status.className="error";
+ }
+}
+
+async function viewHistory(id){
+ const container=document.getElementById("historyDetails");
+ container.innerHTML='<p class="muted">Loading analysis details...</p>';
+
+ try{
+  const response=await fetch("/history/"+id);
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.message||"Unable to load details.");
+
+  const item=result.record||result.history||result;
+  const details=item.details||{};
+
+  const summary=[
+   ["Records",item.total_rows],
+   ["Columns",item.total_columns],
+   ["Worksheets",item.total_sheets],
+   ["Missing Values",item.missing_values],
+   ["Duplicate Rows",item.duplicate_rows],
+   ["Total Issues",item.total_issues],
+   ["High",item.high_issues],
+   ["Medium",item.medium_issues],
+   ["Low",item.low_issues]
+  ];
+
+  let html=`
+   <div class="details-box">
+    <div class="section-title">
+     <h3>Previous Analysis Details</h3>
+     <button class="secondary-btn" onclick="document.getElementById('historyDetails').innerHTML=''">Close</button>
+    </div>
+    <p><strong>Dataset:</strong> ${escapeHTML(item.filename)}</p>
+    <p><strong>Date:</strong> ${escapeHTML(item.analyzed_at)}</p>
+    <div class="grid">`;
+
+  summary.forEach(([label,value])=>{
+   html+=`<div class="stat"><span>${escapeHTML(label)}</span><strong>${Number(value||0).toLocaleString()}</strong></div>`;
+  });
+
+  html+="</div><h3>Saved Recommendations</h3>";
+
+  const recommendations=details.smart_recommendations||details.recommendations||[];
+
+  if(recommendations.length){
+   recommendations.forEach(rec=>{
+    html+=`
+     <div class="issue ${escapeHTML(rec.severity||"")}">
+      <strong>${escapeHTML(rec.issue||"Data issue")} — ${escapeHTML(rec.column_name||"")}</strong>
+      <p>${escapeHTML(rec.suggestion||"")}</p>
+      <p class="muted">Sheet: ${escapeHTML(rec.sheet_name||"")} | Affected: ${Number(rec.affected_count||0)}</p>
+     </div>`;
+   });
+  }else{
+   html+='<p class="muted">No saved recommendations.</p>';
+  }
+
+  const checks=details.validation_checks||[];
+  html+="<h3>Saved Validation Checks</h3>";
+
+  if(checks.length){
+   html+=`<div class="table-wrap"><table>
+    <thead><tr><th>Sheet</th><th>Rows</th><th>Columns</th><th>Missing</th><th>Duplicates</th><th>Issues</th></tr></thead><tbody>`;
+
+   checks.forEach(check=>{
+    html+=`<tr>
+     <td>${escapeHTML(check.sheet_name)}</td>
+     <td>${Number(check.rows||0)}</td>
+     <td>${Number(check.columns||0)}</td>
+     <td>${Number(check.missing_values||0)}</td>
+     <td>${Number(check.duplicate_rows||0)}</td>
+     <td>${Number(check.issues_found||0)}</td>
+    </tr>`;
+   });
+
+   html+="</tbody></table></div>";
+  }else{
+   html+='<p class="muted">No validation details saved.</p>';
+  }
+
+  container.innerHTML=html+"</div>";
+
+ }catch(error){
+  container.innerHTML='<p class="error">Error: '+escapeHTML(error.message)+'</p>';
+ }
+}
+
+async function deleteHistory(id){
+ if(!confirm("Are you sure you want to delete this analysis history record?"))return;
+
+ try{
+  const response=await fetch("/history/"+id,{method:"DELETE"});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.message||"Delete failed.");
+
+  document.getElementById("historyDetails").innerHTML="";
+  await loadHistory();
+ }catch(error){
+  alert("Delete error: "+error.message);
+ }
+}
+
+/* DATASET UPLOAD */
+
+async function uploadDataset(){
+ const file=document.getElementById("fileInput").files[0];
+ if(!file){
+  showStatus("Please select a dataset.","error");
+  return;
+ }
+
+ currentFile=file;
+ const button=document.getElementById("uploadBtn");
+ button.disabled=true;
+ showStatus("Uploading and analyzing your dataset...");
+
+ try{
+  const form=new FormData();
+  form.append("file",file);
+
+  const response=await fetch("/upload",{method:"POST",body:form});
+  const data=await response.json();
+
+  if(!response.ok||!data.success){
+   throw new Error(data.message||"Upload failed.");
+  }
+
+  currentData=data;
+  cleanToken=null;
+  document.getElementById("downloadBtn").disabled=true;
+  document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("reportFilename").textContent="Dataset: "+data.filename;
+
+  renderOverview();
+  renderSheetOptions();
+  renderQuality();
+  renderAnomalies();
+  renderRecommendations();
+  renderValidation();
+
+  showStatus("Dataset analyzed successfully!","success");
+  await loadHistory();
+  document.getElementById("dashboard").scrollIntoView({behavior:"smooth"});
+
+ }catch(error){
+  showStatus("Error: "+error.message,"error");
+ }finally{
+  button.disabled=false;
+ }
+}
+
+function renderOverview(){
+ const d=currentData;
+ const items=[
+  ["Total Records",d.total_rows],
+  ["Total Columns",d.total_columns],
+  ["Worksheets",d.total_sheets],
+  ["Missing Values",d.missing_values],
+  ["Duplicate Rows",d.duplicate_rows]
+ ];
+
+ document.getElementById("overview").innerHTML=items.map(x=>
+  `<div class="stat"><span>${escapeHTML(x[0])}</span><strong>${Number(x[1]||0).toLocaleString()}</strong></div>`
+ ).join("");
+}
+
+/* VISUAL ANALYTICS */
+
+function renderSheetOptions(){
+ const select=document.getElementById("sheetSelect");
+ const sheets=currentData.sheets||{};
+
+ select.innerHTML=Object.keys(sheets).map(name=>
+  `<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`
+ ).join("");
+
+ renderSheetAnalytics();
+}
+
+function renderSheetAnalytics(){
+ if(!currentData)return;
+
+ chartInstances.forEach(chart=>chart.destroy());
+ chartInstances=[];
+
+ const sheetName=document.getElementById("sheetSelect").value;
+ const sheet=(currentData.sheets||{})[sheetName];
+ if(!sheet)return;
+
+ const analytics=sheet.analytics||{numeric:{},categories:{}};
+ const numeric=analytics.numeric||{};
+ const categories=analytics.categories||{};
+ const stats=document.getElementById("numericStats");
+ const charts=document.getElementById("charts");
+
+ stats.innerHTML="";
+ charts.innerHTML="";
+
+ const numericEntries=Object.entries(numeric);
+
+ if(!numericEntries.length){
+  stats.innerHTML='<p class="muted">No numeric columns found in this worksheet.</p>';
+ }else{
+  stats.innerHTML=numericEntries.map(([name,v])=>`
+   <div class="stat">
+    <span>${escapeHTML(name)}</span>
+    <strong>${Number(v.mean||0).toLocaleString(undefined,{maximumFractionDigits:2})}</strong>
+    <small>Average</small>
+    <p class="muted">Min: ${escapeHTML(v.min)} | Max: ${escapeHTML(v.max)}</p>
+   </div>`).join("");
+ }
+
+ numericEntries.forEach(([name,v],index)=>{
+  if(!v.histogram)return;
+  const id="numericChart"+index;
+
+  charts.insertAdjacentHTML("beforeend",`
+   <div class="chart-card">
+    <h3>${escapeHTML(name)} — Distribution</h3>
+    <canvas id="${id}"></canvas>
+   </div>`);
+
+  const chart=new Chart(document.getElementById(id),{
+   type:"bar",
+   data:{
+    labels:v.histogram.labels||[],
+    datasets:[{
+     label:"Records",
+     data:v.histogram.values||[],
+     borderWidth:1
+    }]
+   },
+   options:{responsive:true,plugins:{legend:{display:false}}}
+  });
+
+  chartInstances.push(chart);
+ });
+
+ Object.entries(categories).forEach(([name,v],index)=>{
+  const id="categoryChart"+index;
+
+  charts.insertAdjacentHTML("beforeend",`
+   <div class="chart-card">
+    <h3>${escapeHTML(name)} — Top Values</h3>
+    <canvas id="${id}"></canvas>
+   </div>`);
+
+  const chart=new Chart(document.getElementById(id),{
+   type:"doughnut",
+   data:{
+    labels:v.labels||[],
+    datasets:[{data:v.values||[]}]
+   },
+   options:{responsive:true}
+  });
+
+  chartInstances.push(chart);
+ });
+
+ if(!numericEntries.length&&!Object.keys(categories).length){
+  charts.innerHTML='<p class="muted">No suitable columns available for charts.</p>';
+ }
+}
+
+/* QUALITY SCORE */
+
+function renderQuality(){
+ const s=currentData.validation_summary||{};
+ const score=currentData.quality_score;
+
+ const items=[
+  ["Data Quality Score",score===undefined||score===null?"N/A":Number(score).toFixed(1)+"%"],
+  ["Total Issues",s.total_issues||0],
+  ["High Severity",s.high||0],
+  ["Medium Severity",s.medium||0],
+  ["Low Severity",s.low||0]
+ ];
+
+ document.getElementById("quality").innerHTML=items.map(x=>
+  `<div class="stat">
+   <span>${escapeHTML(x[0])}</span>
+   <strong>${escapeHTML(x[1])}</strong>
+  </div>`
+ ).join("");
+
+ if(severityChartInstance)severityChartInstance.destroy();
+
+ severityChartInstance=new Chart(
+  document.getElementById("severityChart"),
+  {
+   type:"doughnut",
+   data:{
+    labels:["High","Medium","Low"],
+    datasets:[{data:[s.high||0,s.medium||0,s.low||0]}]
+   },
+   options:{responsive:true}
+  }
+ );
+}
+
+/* PROFESSIONAL ANOMALY DETECTION */
+
+function renderAnomalies(){
+ const container=document.getElementById("anomalies");
+ const results=currentData.anomaly_results;
+
+ anomalySheets=[];
+
+ if(results===undefined||results===null){
+  container.innerHTML='<p class="muted">Anomaly detection results were not provided by the backend.</p>';
+  return;
+ }
+
+ let entries=[];
+
+ if(Array.isArray(results)){
+  entries=results.map((value,index)=>["Result "+(index+1),value]);
+ }else if(typeof results==="object"){
+  entries=Object.entries(results);
+ }else{
+  entries=[["Anomaly Results",results]];
+ }
+
+ if(!entries.length){
+  container.innerHTML='<p class="success">No anomaly results were reported.</p>';
+  return;
+ }
+
+ anomalySheets=entries.map(([name,value])=>{
+  const result=value&&typeof value==="object"?value:{};
+  return {
+   name:result.sheet_name||name,
+   status:result.status||"Unknown",
+   anomalies:Number(result.anomalies_found||0),
+   percentage:Number(result.anomaly_percentage||0),
+   checked:Number(result.records_checked||0),
+   records:Array.isArray(result.anomaly_records)?result.anomaly_records:[]
+  };
+ });
+
+ const totalAnomalies=anomalySheets.reduce((sum,s)=>sum+s.anomalies,0);
+ const totalChecked=anomalySheets.reduce((sum,s)=>sum+s.checked,0);
+ const completed=anomalySheets.filter(s=>s.status==="Completed").length;
+
+ let html=`
+  <div class="anomaly-summary">
+   <div class="anomaly-card">
+    <span>Total Unusual Records</span>
+    <strong>${totalAnomalies.toLocaleString()}</strong>
+   </div>
+   <div class="anomaly-card">
+    <span>Records Checked</span>
+    <strong>${totalChecked.toLocaleString()}</strong>
+   </div>
+   <div class="anomaly-card">
+    <span>Worksheets Analyzed</span>
+    <strong>${completed} / ${anomalySheets.length}</strong>
+   </div>
+  </div>
+  <p class="muted">Anomaly detection identifies records that differ from common numerical patterns. These records are not automatically data errors.</p>
+ `;
+
+ anomalySheets.forEach((sheet,index)=>{
+  const completed=sheet.status==="Completed";
+  const statusClass=completed?"anomaly-status":"anomaly-status warning";
+  const statusText=completed?"Analysis completed":sheet.status;
+
+  html+=`
+   <div class="anomaly-sheet">
+    <div class="anomaly-sheet-header">
+     <div>
+      <h3>${escapeHTML(sheet.name)}</h3>
+      <p class="muted">${sheet.checked.toLocaleString()} records checked</p>
+     </div>
+     <span class="${statusClass}">${escapeHTML(statusText)}</span>
+    </div>
+    <div class="anomaly-summary">
+     <div class="anomaly-card">
+      <span>Unusual Records</span>
+      <strong>${sheet.anomalies.toLocaleString()}</strong>
+     </div>
+     <div class="anomaly-card">
+      <span>Anomaly Percentage</span>
+      <strong>${sheet.percentage.toFixed(2)}%</strong>
+     </div>
+    </div>
+ `;
+
+  if(!completed){
+   html+=`<div class="anomaly-empty">${escapeHTML(sheet.status)}. This worksheet does not contain enough suitable numeric data for anomaly detection.</div>`;
+  }else if(!sheet.records.length){
+   html+='<div class="anomaly-empty">No unusual records were returned for this worksheet.</div>';
+  }else{
+   html+=`
+    <div class="anomaly-toolbar">
+     <input class="anomaly-search" type="search"
+      placeholder="Search records or values..."
+      oninput="filterAnomalyRecords(${index},this.value)">
+    </div>
+    <p class="muted">Showing detected records returned by the analysis model.</p>
+    <div class="table-wrap">
+     <table class="anomaly-table">
+      <thead id="anomalyHead${index}"></thead>
+      <tbody id="anomalyBody${index}"></tbody>
+     </table>
+    </div>
+    <div class="anomaly-pagination" id="anomalyPagination${index}"></div>
+   `;
+  }
+
+  html+="</div>";
+ });
+
+ html+=`
+  <div class="anomaly-note">
+   <strong>Understanding anomaly scores</strong>
+   <p>DataTrust uses an anomaly detection model to identify unusual numerical patterns. A more negative Isolation Forest score generally indicates a more unusual record. A flagged record should be reviewed, not automatically deleted.</p>
+  </div>
+ `;
+
+ container.innerHTML=html;
+
+ anomalySheets.forEach((sheet,index)=>{
+  if(sheet.status==="Completed"&&sheet.records.length){
+   sheet.filteredRecords=sheet.records.slice();
+   sheet.currentPage=1;
+   displayAnomalyPage(index);
+  }
+ });
+}
+
+function filterAnomalyRecords(index,query){
+ const sheet=anomalySheets[index];
+ if(!sheet)return;
+
+ const search=String(query||"").toLowerCase().trim();
+
+ sheet.filteredRecords=sheet.records.filter(record=>{
+  return JSON.stringify(record).toLowerCase().includes(search);
+ });
+
+ sheet.currentPage=1;
+ displayAnomalyPage(index);
+}
+
+function displayAnomalyPage(index){
+ const sheet=anomalySheets[index];
+ if(!sheet)return;
+
+ const records=sheet.filteredRecords||sheet.records;
+ const head=document.getElementById("anomalyHead"+index);
+ const body=document.getElementById("anomalyBody"+index);
+ const pagination=document.getElementById("anomalyPagination"+index);
+
+ if(!head||!body||!pagination)return;
+
+ const columns=new Set();
+ records.forEach(record=>{
+  Object.keys(record.values||{}).forEach(key=>columns.add(key));
+ });
+
+ const columnNames=Array.from(columns);
+ const totalPages=Math.max(1,Math.ceil(records.length/anomalyPageSize));
+
+ sheet.currentPage=Math.min(sheet.currentPage||1,totalPages);
+
+ head.innerHTML="<tr><th>Row Number</th>"+
+  columnNames.map(col=>`<th>${escapeHTML(col)}</th>`).join("")+
+  "<th>Anomaly Score</th></tr>";
+
+ if(!records.length){
+  body.innerHTML=`<tr><td colspan="${columnNames.length+2}">No matching records found.</td></tr>`;
+  pagination.innerHTML="<span class='muted'>0 matching records</span>";
+  return;
+ }
+
+ const start=(sheet.currentPage-1)*anomalyPageSize;
+ const pageRecords=records.slice(start,start+anomalyPageSize);
+
+ body.innerHTML=pageRecords.map(record=>{
+  const values=record.values||{};
+  return `
+   <tr>
+    <td>${escapeHTML(record.row_number??"—")}</td>
+    ${columnNames.map(col=>`<td>${escapeHTML(values[col]??"—")}</td>`).join("")}
+    <td class="score-value">${escapeHTML(
+     typeof record.anomaly_score==="number"
+      ?record.anomaly_score.toFixed(5)
+      :record.anomaly_score??"—"
+    )}</td>
+   </tr>`;
+ }).join("");
+
+ pagination.innerHTML=`
+  <span class="muted">
+   Showing ${start+1}–${Math.min(start+anomalyPageSize,records.length)}
+   of ${records.length.toLocaleString()} records
+  </span>
+  <div class="actions">
+   <button class="secondary-btn" onclick="changeAnomalyPage(${index},-1)" ${sheet.currentPage<=1?"disabled":""}>Previous</button>
+   <span class="muted">Page ${sheet.currentPage} of ${totalPages}</span>
+   <button onclick="changeAnomalyPage(${index},1)" ${sheet.currentPage>=totalPages?"disabled":""}>Next</button>
+  </div>
+ `;
+}
+
+function changeAnomalyPage(index,direction){
+ const sheet=anomalySheets[index];
+ if(!sheet)return;
+
+ const records=sheet.filteredRecords||sheet.records;
+ const totalPages=Math.max(1,Math.ceil(records.length/anomalyPageSize));
+
+ sheet.currentPage=Math.max(1,Math.min(totalPages,sheet.currentPage+direction));
+ displayAnomalyPage(index);
+}
+
+/* SMART RECOMMENDATIONS */
+
+function renderRecommendations(){
+ const list=currentData.smart_recommendations||[];
+ const container=document.getElementById("recommendations");
+
+ if(!list.length){
+  container.innerHTML='<p class="success">No validation issues detected in this dataset.</p>';
+  return;
+ }
+
+ container.innerHTML=list.map(item=>`
+  <div class="issue ${escapeHTML(item.severity||"")}">
+   <strong>${escapeHTML(item.issue||"Data issue")} — ${escapeHTML(item.column_name||"")}</strong>
+   <p class="muted">
+    Sheet: ${escapeHTML(item.sheet_name||"")}
+    | Severity: ${escapeHTML(item.severity||"")}
+    | Affected: ${Number(item.affected_count||item.count||0)}
+   </p>
+   <p>${escapeHTML(item.suggestion||item.recommendation||"Review this data issue.")}</p>
+  </div>
+ `).join("");
+}
+
+/* VALIDATION CHECKS */
+
+function renderValidation(){
+ document.getElementById("validationTable").innerHTML=
+ (currentData.validation_checks||[]).map(item=>`
+  <tr>
+   <td>${escapeHTML(item.sheet_name)}</td>
+   <td>${Number(item.rows||0)}</td>
+   <td>${Number(item.columns||0)}</td>
+   <td>${Number(item.missing_values||0)}</td>
+   <td>${Number(item.duplicate_rows||0)}</td>
+   <td>${Number(item.issues_found||0)}</td>
+  </tr>
+ `).join("");
+}
+
+/* AUTOMATIC DATA CLEANING */
+
+async function previewCleaning(){
+ if(!currentFile){
+  alert("Upload a dataset first.");
+  return;
+ }
+
+ const form=new FormData();
+ form.append("file",currentFile);
+ form.append("trim_spaces",document.getElementById("trimSpaces").checked);
+ form.append("fill_missing",document.getElementById("fillMissing").checked);
+ form.append("remove_duplicates",document.getElementById("removeDuplicates").checked);
+
+ const status=document.getElementById("cleanStatus");
+ status.textContent="Generating cleaning preview...";
+ status.className="muted";
+
+ try{
+  const response=await fetch("/clean-preview",{method:"POST",body:form});
+  const data=await response.json();
+
+  if(!response.ok||!data.success){
+   throw new Error(data.message||"Cleaning failed.");
+  }
+
+  cleanToken=data.token;
+  document.getElementById("downloadBtn").disabled=false;
+
+  let html="<h3>Cleaning Summary</h3>";
+
+  html+=(data.actions||[]).length
+   ?data.actions.map(a=>`
+    <div class="issue">
+     <strong>${escapeHTML(a.action)}</strong>
+     <p>${escapeHTML(a.sheet_name)} — ${escapeHTML(a.column)}: ${Number(a.count||0)} records</p>
+    </div>`).join("")
+   :"<p>No changes were needed for the selected operations.</p>";
+
+  Object.entries(data.preview||{}).forEach(([name,p])=>{
+   html+=`
+    <h3>${escapeHTML(name)}</h3>
+    <p class="muted">Before: ${Number(p.before_rows||0)} rows | After: ${Number(p.after_rows||0)} rows</p>
+    <div class="table-wrap">
+     <table>
+      <thead><tr>${(p.columns||[]).map(c=>`<th>${escapeHTML(c)}</th>`).join("")}</tr></thead>
+      <tbody>`;
+
+   (p.rows||[]).slice(0,5).forEach(row=>{
+    html+="<tr>"+(p.columns||[]).map(c=>
+     `<td>${escapeHTML(row[c]??"")}</td>`
+    ).join("")+"</tr>";
+   });
+
+   html+="</tbody></table></div>";
+  });
+
+  document.getElementById("cleanResults").innerHTML=html;
+  status.textContent="Cleaning preview generated successfully.";
+  status.className="success";
+
+ }catch(error){
+  status.textContent="Error: "+error.message;
+  status.className="error";
+ }
+}
+
+function downloadCleaned(){
+ if(!cleanToken)return;
+ window.location.href="/download-cleaned/"+encodeURIComponent(cleanToken);
+}
+
+/* PDF EXPORT */
+
+function exportPDF(){
+ if(!currentData){
+  alert("Please upload a dataset first.");
+  return;
+ }
+
+ const oldTitle=document.title;
+ document.title="DataTrust_Analytics_Report_"+Date.now();
+
+ setTimeout(()=>{
+  window.print();
+  document.title=oldTitle;
+ },500);
+}
+
+document.addEventListener("DOMContentLoaded",loadHistory);
+</script>
+</body>
+</html>
