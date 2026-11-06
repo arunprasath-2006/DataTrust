@@ -172,8 +172,7 @@ DataTrust is deployed on Render:
 
 ## License
 
-Add a license to this repository if you intend to specify how others may
-use, modify, and distribute the project.
+This Project is licensed under the MIT License
 
 ------------------------------------------------------------------------
 
