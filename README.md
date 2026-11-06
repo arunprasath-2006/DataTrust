@@ -168,7 +168,7 @@ DataTrust is deployed on Render:
     Platform
 -   **Program:** B.Sc. Computer Science with Data Science
 -   **Project Type:** Final-Year Major Project
--   **Author:** \[Add your name\]
+-   **Author:** Arun prasath M
 
 ## License
 
